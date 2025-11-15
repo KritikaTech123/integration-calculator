@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <title>Integration Dashboard</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen bg-glassmix">
+
+  <!-- Floating Glass Navbar -->
+  <header class="glass-nav fixed top-4 left-1/2 -translate-x-1/2 w-[94%] max-w-6xl px-5 py-3 rounded-2xl flex items-center justify-between shadow-xl z-50">
+    <div class="flex items-center gap-3">
+      <div class="logo-dot"></div>
+      <span class="font-semibold tracking-wide">Integration Dashboard</span>
+    </div>
+
+    <div class="hidden md:flex items-center gap-3 w-1/2">
+      <div class="relative flex-1">
+        <input id="search" class="input soft w-full pl-10" placeholder="Search…" />
+        <svg class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M21 21l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <!-- Animated Theme Toggle -->
+      <label class="toggle-wrap cursor-pointer select-none">
+        <input type="checkbox" class="sr-only" id="themeToggle" onchange="toggleTheme()">
+        <span class="toggle-track">
+          <span id="toggleKnob" class="toggle-knob">
+            <span class="sun"></span><span class="moon"></span>
+          </span>
+        </span>
+      </label>
+
+      <div class="avatar"><span>KK</span></div>
+    </div>
+  </header>
+
+  <!-- Page wrapper -->
+  <div class="pt-28 pb-24">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-[86px_1fr] gap-7">
+
+        <!-- Sidebar (desktop) -->
+        <aside class="glass-card px-2 py-4 rounded-2xl sticky top-28 h-fit hidden md:block">
+          <nav id="sidebar" class="flex md:flex-col items-center gap-3 md:gap-4">
+            <a href="#calcCard" class="side-icon" data-target="calcCard" title="Calculator">
+              <svg viewBox="0 0 24 24" class="ico"><path d="M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 13h8M8 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="side-label">Calculator</span>
+            </a>
+            <a href="#resultCard" class="side-icon" data-target="resultCard" title="Preview & Result">
+              <svg viewBox="0 0 24 24" class="ico"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+              <span class="side-label">Preview</span>
+            </a>
+            <a href="#graphCard" class="side-icon" data-target="graphCard" title="Graph">
+              <svg viewBox="0 0 24 24" class="ico"><path d="M4 19V5M20 19H4M7 15l3-4 3 2 4-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="side-label">Graph</span>
+            </a>
+            <a href="#aboutCard" class="side-icon" data-target="aboutCard" title="About">
+              <svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="side-label">About</span>
+            </a>
+          </nav>
+        </aside>
+
+        <!-- Main content -->
+        <main class="space-y-7">
+
+          <!-- Calculator -->
+          <section id="calcCard" class="glass-card p-6 rounded-2xl scroll-mt-28">
+            <h2 class="card-title">Calculator</h2>
+            <p class="card-sub">Enter function, limits & method. Backend: Flask + SymPy + NumPy.</p>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="md:col-span-2">
+                <label class="label">Function (SymPy style)</label>
+                <input id="func" class="input" value="sin(x)" oninput="updatePreview()">
+              </div>
+
+              <div>
+                <label class="label">Lower limit (a)</label>
+                <input id="a" class="input" value="0" oninput="updatePreview()">
+              </div>
+              <div>
+                <label class="label">Upper limit (b)</label>
+                <input id="b" class="input" value="3.1416" oninput="updatePreview()">
+              </div>
+
+              <div>
+                <label class="label">Method</label>
+                <select id="method" class="input">
+                  <option value="trapezoid">Composite Trapezoid</option>
+                  <option value="simpson">Composite Simpson</option>
+                  <option value="romberg">Romberg</option>
+                  <option value="montecarlo">Monte Carlo</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="label">n / samples</label>
+                <input id="n" class="input" value="100">
+                <p class="text-sm opacity-80">
+                  <br>
+              Tip: Start with n=100 and increase for better accuracy.
+            </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mt-5">
+              <button class="btn-primary neon" onclick="calculate()">Calculate</button>
+              <button class="btn" onclick="resetForm()">Reset</button>
+              <button class="btn" onclick="exportPDF()">Export PDF</button>
+            </div>
+          </section>
+
+          <!-- Preview + Graph -->
+          <section id="resultCard" class="grid gap-7 lg:grid-cols-2 scroll-mt-28">
+            <div class="glass-card p-6 rounded-2xl">
+              <h3 class="card-title">Preview</h3>
+              <div class="panel mb-4">
+                <p><b>Function:</b> <span id="prevFunc">sin(x)</span></p>
+                <p><b>Range:</b> <span id="prevRange">[0, 3.1416]</span></p>
+              </div>
+
+              <h3 class="card-title mt-5">Result</h3>
+              <div class="result-box text-sky-600 dark:text-sky-300">
+                <span id="result">—</span>
+              </div>
+
+              <div class="flex gap-3 mt-3">
+                <button class="btn" onclick="copyResult()">Copy</button>
+                <button class="btn" onclick="exportPDF()">Save PDF</button>
+              </div>
+            </div>
+
+            <div id="graphCard" class="glass-card p-6 rounded-2xl">
+              <div class="flex items-center justify-between">
+                <h3 class="card-title">Function Graph</h3>
+              </div>
+              <canvas id="chart" height="240"></canvas>
+            </div>
+          </section>
+
+          <!-- About -->
+          <section id="aboutCard" class="glass-card p-6 rounded-2xl scroll-mt-28">
+            <h3 class="card-title">About this Tool</h3>
+            <p class="text-sm opacity-80">
+              Numerical integration using Trapezoid, Simpson, Romberg & Monte Carlo methods.
+              Frontend: White Glassmix Dashboard with Tailwind, Chart.js, jsPDF.
+            </p>
+            <br>
+            <p class="text-sm opacity-80">
+              Designed by Kritika
+            </p>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav (mobile) -->
+  <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-card rounded-2xl px-4 py-2 z-50">
+    <div class="grid grid-cols-4 gap-2">
+      <a href="#calcCard" class="mnav-item" data-target="calcCard">Calc</a>
+      <a href="#resultCard" class="mnav-item" data-target="resultCard">Preview</a>
+      <a href="#graphCard" class="mnav-item" data-target="graphCard">Graph</a>
+      <a href="#aboutCard" class="mnav-item" data-target="aboutCard">About</a>
+    </div>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
