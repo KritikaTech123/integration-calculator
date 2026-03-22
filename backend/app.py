@@ -1,10 +1,13 @@
+import io
+import os
+
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 import numpy as np
 import sympy as sp
-import io, matplotlib
+import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from flask_cors import CORS
+import matplotlib.pyplot as plt  # noqa: E402 (must follow matplotlib.use)
 
 app = Flask(__name__)
 CORS(app)
@@ -108,4 +111,6 @@ def plot_png():
 def home():
     return "Backend running!"
 
-app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=5000, debug=debug)
