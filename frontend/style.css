@@ -85,6 +85,8 @@
   box-shadow:0 8px 22px rgba(0,210,255,.28);
 }
 .neon::after{
+  content: "";
+  position: absolute;
   inset:-60%;
   background:radial-gradient(closest-side, rgba(0,210,255,.4), transparent 75%);
 }
